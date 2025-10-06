@@ -53,9 +53,7 @@
         border-radius: 28px;
         margin: 5px 10px;
       }
-      /* #messages > li:nth-child(odd) {
-        background: #efefef;
-      } */
+
       .right {
         float: right;
         clear: both;
@@ -69,10 +67,19 @@
     </style>
   </head>
   <body>
+    <div
+      id="current-user"
+      style="
+        padding: 1rem;
+        background: #eee;
+        font-weight: bold;
+        text-align: center;
+      "
+    ></div>
+
     <ul id="messages">
-      <li class="right">This is Harpreet</li>
-      <li class="left">This is Kamal</li>
-     
+      <!-- <li class="right">This is Harp</li>
+      <li class="left">This is Kamal</li> -->
     </ul>
     <form id="form" action="">
       <input id="input" autocomplete="off" />
@@ -80,43 +87,45 @@
     </form>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
 
-    <!-- <script src="/socket.io/socket.io.js"></script> -->
     <script>
       const socket = io('https://harpreetkaur01.github.io/RealTimeChatApp/');
 
       const form = document.getElementById("form");
       const input = document.getElementById("input");
       const messages = document.getElementById("messages");
-      let name = prompt("Enter your naem");
-      name = name + " Joined Chat"
-      console.log(name);
+      const currentUserDiv = document.getElementById("current-user");
+
+      // Ask user's name when joining
+      let name = prompt("Enter your name") || "Anonymous";
+      currentUserDiv.innerText = `You are: ${name}`;
 
       socket.emit("new-user", name);
+
+      // When new user joins, notify everyone else
       socket.on("new-user", (name) => {
+       
         const item2 = document.createElement("li");
-        item2.textContent = name;
+        item2.textContent = `${name} Joined Chat`;
         item2.classList.add("left");
         messages.appendChild(item2);
       });
 
+      // When user sends messages
       form.addEventListener("submit", (e) => {
         e.preventDefault();
         if (input.value) {
-          // STEP 1 - send message from CLIENT
-          //   socket.emit("chat message", name);
           const item1 = document.createElement("li");
-          item1.textContent = input.value;
+          item1.textContent = `You: ${input.value}`;
           item1.classList.add("right");
           messages.appendChild(item1);
-
-          socket.emit("chat message", input.value);
+          socket.emit("chat message", { user: name, text: input.value });
           input.value = "";
         }
       });
       // receive message from server
       socket.on("chat message", (msg) => {
         const item = document.createElement("li");
-        item.textContent = msg;
+        item.textContent = `${msg.user}: ${msg.text}`;
         item.classList.add("left");
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);

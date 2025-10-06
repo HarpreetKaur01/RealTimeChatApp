@@ -6,6 +6,14 @@ import { Server } from 'socket.io';
 
 const app = express();
 
+// socket.on → "listen for events from client"
+
+// socket.emit → "send events to client(s)"
+
+// Broadcast → everyone except sender
+
+// io.emit → everyone including sender
+
 //Http server
 const server = createServer(app);
 
@@ -34,6 +42,7 @@ io.on('connect', (socket) => {
         });
   });
 
-server.listen(3000, () => {
-  console.log('server running at http://localhost:3000');
+  const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`server running at http://localhost:${PORT}`);
 });
